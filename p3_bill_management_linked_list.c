@@ -6,16 +6,29 @@ struct node
     int data ;
     struct node *next;
 };
-struct node *head,*temp,*newnode;
-//for newnode
-struct node *getnode()
-{
-    newnode=(struct node*)malloc(sizeof(struct node));
-    printf("Enter bill amount : ");
-    scanf("%d",&newnode->data);
-    newnode->next=0;
-    return (newnode);
-};
+struct node *head,*temp;
+
+// Function to add a new bill at the end
+void addBill(int amount) {
+    struct node *newNode = (struct node*)malloc(sizeof(struct node));
+    if (newNode == NULL) {
+        printf("Memory allocation failed.\n");
+        return;
+    }
+    newNode->data = amount;
+    newNode->next = NULL;
+
+    if (head == NULL) {
+        head = newNode;
+    } else {
+        struct node *curr = head;
+        while (curr->next != NULL)
+            curr = curr->next;
+        curr->next = newNode;
+    }
+
+    printf("Bill of Rs %d added successfully.\n", amount);
+}
 
 //Display Data
 void display()
@@ -33,13 +46,7 @@ void display()
     }
 }
 
-//insertion
-void insert_at_start()
-{
-    newnode=getnode();
-    newnode->next=head;
-    head=newnode;
-}
+//insertion removed; using addBill instead
 
 void total_sales() {
     if (head == NULL) {
@@ -89,7 +96,17 @@ int main()
 
         switch (choice) {
             case 1:
-                insert_at_start();
+                {
+                    int amount;
+                    printf("Enter bill amount : ");
+                    if (scanf("%d", &amount) == 1) {
+                        addBill(amount);
+                    } else {
+                        printf("Invalid amount input.\n");
+                        // clear input buffer in a simple way
+                        int c; while ((c = getchar()) != '\n' && c != EOF) {}
+                    }
+                }
                 break;
             case 2:
                 display();
