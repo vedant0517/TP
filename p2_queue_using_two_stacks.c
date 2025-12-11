@@ -1,163 +1,110 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 100
+#define MAX 50
 
-// Stack structure
-struct Stack {
-    int arr[MAX];
-    int top;
-};
+int stack1[MAX], stack2[MAX];
+int top1 = -1, top2 = -1;
 
-// Initialize stack
-void init(struct Stack* s) {
-    s->top = -1;
-}
-
-// Check if stack is empty
-int isEmpty(struct Stack* s) {
-    return s->top == -1;
-}
-
-// Check if stack is full
-int isFull(struct Stack* s) {
-    return s->top == MAX - 1;
-}
-
-// Push element
-void push(struct Stack* s, int x) {
-    if (isFull(s)) {
-        printf("Stack Overflow\n");
+void push1(int val) {
+    if (top1 == MAX - 1) {
+        printf("Stack1 Overflow\n");
         return;
     }
-    s->arr[++s->top] = x;
+    stack1[++top1] = val;
 }
 
-// Pop element
-int pop(struct Stack* s) {
-    if (isEmpty(s)) {
-        printf("Stack Underflow\n");
-        return -1;
+void push2(int val) {
+    if (top2 == MAX - 1) {
+        printf("Stack2 Overflow\n");
+        return;
     }
-    return s->arr[s->top--];
+    stack2[++top2] = val;
 }
 
-// Queue using two stacks
-struct Queue {
-    struct Stack s1, s2;
-};
-
-// Initialize queue
-void initQueue(struct Queue* q) {
-    init(&q->s1);
-    init(&q->s2);
+int pop1() {
+    if (top1 == -1) return -1;
+    return stack1[top1--];
 }
 
-// Enqueue operation (O(1))
-void enqueue(struct Queue* q, int x) {
-    push(&q->s1, x);
+int pop2() {
+    if (top2 == -1) return -1;
+    return stack2[top2--];
 }
 
-// Dequeue operation (Amortized O(1))
-int dequeue(struct Queue* q) {
-    if (isEmpty(&q->s1) && isEmpty(&q->s2)) {
+void enqueue(int val) {
+    push1(val);
+    printf("Enqueued: %d\n", val);
+}
+
+int dequeue() {
+    if (top2 == -1) {
+        while (top1 != -1) {
+            push2(pop1());
+        }
+    }
+
+    int val = pop2();
+    if (val == -1) {
         printf("Queue is empty\n");
         return -1;
     }
 
-    if (isEmpty(&q->s2)) {
-        while (!isEmpty(&q->s1)) {
-            push(&q->s2, pop(&q->s1));
-        }
-    }
-    return pop(&q->s2);
+    printf("Dequeued: %d\n", val);
+    return val;
 }
 
-// Peek front element
-int peek(struct Queue* q) {
-    if (isEmpty(&q->s1) && isEmpty(&q->s2)) {
-        printf("Queue is empty\n");
-        return -1;
-    }
-
-    if (isEmpty(&q->s2)) {
-        while (!isEmpty(&q->s1)) {
-            push(&q->s2, pop(&q->s1));
-        }
-    }
-    return q->s2.arr[q->s2.top];
-}
-
-// Display queue elements
-void display(struct Queue* q) {
-    int i;
-    // Transfer all to s2 to display in queue order
-    if (isEmpty(&q->s1) && isEmpty(&q->s2)) {
+void displayQueue() {
+    if (top1 == -1 && top2 == -1) {
         printf("Queue is empty\n");
         return;
     }
-    // Copy stacks to avoid modifying original
-    struct Stack temp1 = q->s1, temp2 = q->s2;
-    // Move all from temp1 to temp2
-    while (!isEmpty(&temp1)) {
-        push(&temp2, pop(&temp1));
+
+    printf("Queue elements: ");
+
+    // First print stack2 (front of queue)
+    for (int i = top2; i >= 0; i--) {
+        printf("%d ", stack2[i]);
     }
-    printf("Queue: ");
-    for (i = temp2.top; i >= 0; i--) {
-        printf("%d ", temp2.arr[i]);
+
+    // Then print stack1 (back of queue)
+    for (int i = 0; i <= top1; i++) {
+        printf("%d ", stack1[i]);
     }
+
     printf("\n");
 }
 
-// Menu-driven main function
 int main() {
-    struct Queue q;
-    int choice, val;
-    initQueue(&q);
+    int ch, val;
 
     while (1) {
-        printf("\nQueue Using Two Stacks (Menu)\n");
-        printf("1. Enqueue\n");
-        printf("2. Dequeue\n");
-        printf("3. Peek\n");
-        printf("4. Display\n");
-        printf("5. Exit\n");
+        printf("\n1. Enqueue\n2. Dequeue\n3. Display\n4. Exit\n");
         printf("Enter your choice: ");
-        if (scanf("%d", &choice) != 1) {
-            printf("Invalid input. Exiting.\n");
+        scanf("%d", &ch);
+
+        switch (ch) {
+        case 1:
+            printf("Enter value to enqueue: ");
+            scanf("%d", &val);
+            enqueue(val);
             break;
-        }
-        switch (choice) {
-            case 1:
-                printf("Enter value to enqueue: ");
-                if (scanf("%d", &val) != 1) {
-                    printf("Invalid input.\n");
-                    // Clear input buffer
-                    while (getchar() != '\n');
-                    break;
-                }
-                enqueue(&q, val);
-                printf("%d enqueued.\n", val);
-                break;
-            case 2:
-                val = dequeue(&q);
-                if (val != -1)
-                    printf("Dequeued: %d\n", val);
-                break;
-            case 3:
-                val = peek(&q);
-                if (val != -1)
-                    printf("Front element: %d\n", val);
-                break;
-            case 4:
-                display(&q);
-                break;
-            case 5:
-                printf("Exiting...\n");
-                exit(0);
-            default:
-                printf("Invalid choice. Try again.\n");
+
+        case 2:
+            dequeue();
+            break;
+
+        case 3:
+            displayQueue();
+            break;
+
+        case 4:
+            exit(0);
+
+        default:
+            printf("Invalid choice. Try again.\n");
         }
     }
+
     return 0;
 }
